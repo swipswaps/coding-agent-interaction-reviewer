@@ -15,38 +15,13 @@
 //                 developer" / "Would this build or erode trust"
 
 export const DIMENSIONS = [
-  {
-    id: 'preamble',
-    label: 'Preamble',
-    question: 'Does the preamble help the reader decide what to do, or is it noise?',
-    weight: 0.25,
-  },
-  {
-    id: 'reasoning',
-    label: 'Reasoning',
-    question: 'Does the explanation hold together, or does it assert without support?',
-    weight: 0.25,
-  },
-  {
-    id: 'judgment',
-    label: 'Engineering judgment',
-    question: 'Does the response reflect how a strong engineer would think about the problem?',
-    weight: 0.30,
-  },
-  {
-    id: 'trust',
-    label: 'Trust calibration',
-    question: 'Would this interaction build or erode an experienced developer’s trust?',
-    weight: 0.20,
-  },
+  { id: 'preamble', label: 'Preamble', question: 'Does the preamble help the reader decide what to do, or is it noise?', weight: 0.25 },
+  { id: 'reasoning', label: 'Reasoning', question: 'Does the explanation hold together, or does it assert without support?', weight: 0.25 },
+  { id: 'judgment', label: 'Engineering judgment', question: 'Does the response reflect how a strong engineer would think about the problem?', weight: 0.30 },
+  { id: 'trust', label: 'Trust calibration', question: 'Would this interaction build or erode an experienced developer’s trust?', weight: 0.20 },
 ]
 
-// The verdict vocabulary. "strong" is not the same as "the code works".
 export const VERDICTS = ['strong', 'weak', 'misleading']
-
-// The tempting shortcut verdict for each interaction: the verdict a reviewer
-// reaches for when the only signal they check is "does the code run".
-// The rubric is expected to disagree with every one of these.
 
 export function scoreInteraction(interaction, scores) {
   let weighted = 0
@@ -98,7 +73,7 @@ export function reviewInteraction(interaction) {
 
 function buildNote(verdict, interaction) {
   if (verdict === 'strong') {
-    return `Strong interaction: preamble is useful, reasoning holds, judgment reflects a senior engineer, and the response earns trust.`
+    return 'Strong interaction: preamble is useful, reasoning holds, judgment reflects a senior engineer, and the response earns trust.'
   }
   if (verdict === 'misleading') {
     return `Misleading: at least one dimension is absent. ${interaction.catches}`

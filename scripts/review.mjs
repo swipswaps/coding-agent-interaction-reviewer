@@ -13,10 +13,6 @@ function main() {
   const weak = rows.filter((r) => r.verdict === 'weak')
   const misleading = rows.filter((r) => r.verdict === 'misleading')
 
-  // The discrimination property: for every interaction whose tempting verdict
-  // disagrees with the reference, the rubric's verdict must match the
-  // reference and reject the tempting one. A rubric that agrees with the
-  // shortcut is not a rubric; it is a restatement of the shortcut.
   const checks = rows.map((r) => ({
     interactionId: r.interactionId,
     tempting: r.temptingVerdict,
@@ -31,9 +27,7 @@ function main() {
     generatedAt: new Date().toISOString(),
     generator: 'scripts/review.mjs',
     buildId: process.env.GITHUB_SHA ?? null,
-    dimensions: DIMENSIONS.map((d) => ({
-      id: d.id, label: d.label, question: d.question, weight: d.weight,
-    })),
+    dimensions: DIMENSIONS.map((d) => ({ id: d.id, label: d.label, question: d.question, weight: d.weight })),
     interactions: INTERACTIONS.map((i) => ({
       id: i.id, label: i.label, prompt: i.prompt, response: i.response,
       scores: i.scores, temptingVerdict: i.temptingVerdict,

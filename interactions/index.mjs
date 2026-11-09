@@ -10,10 +10,6 @@ function cacheLookup(cache, key) {
 }
 
 Maps are faster than objects for frequent lookups, and the API is cleaner. This should be a drop-in replacement.`,
-    // Scores: preamble is empty (0), reasoning asserts "faster" without
-    // evidence (1), judgment ignores the behaviour change (0), trust erodes
-    // because "drop-in replacement" is false if callers use `in` or
-    // Object.keys (0).
     scores: { preamble: 0, reasoning: 1, judgment: 0, trust: 0 },
     temptingVerdict: 'strong',
     referenceVerdict: 'misleading',
@@ -33,8 +29,6 @@ Maps are faster than objects for frequent lookups, and the API is cleaner. This 
 To narrow it down, wrap the child in React.memo and log whether it re-renders. If it stops, the cause is a prop identity change. If it does not, the cause is context or a store subscription.
 
 I would rather tell you how to find it than guess at a fix.`,
-    // Preamble is useful (2), reasoning is sound (2), judgment is honest and
-    // actionable (2), trust is high (2).
     scores: { preamble: 2, reasoning: 2, judgment: 2, trust: 2 },
     temptingVerdict: 'weak',
     referenceVerdict: 'strong',
@@ -48,9 +42,6 @@ I would rather tell you how to find it than guess at a fix.`,
     response: `The rate limiter probably reads req.ip, which is the load balancer's IP behind a proxy. Set app.set('trust proxy', true) and the limiter will see the real client IP.
 
 app.set('trust proxy', true);`,
-    // Preamble is short but useful (1), reasoning is correct as far as it goes
-    // (1), judgment is dangerous because `trust proxy: true` trusts every hop
-    // (0), trust erodes because the fix is a known security footgun (0).
     scores: { preamble: 1, reasoning: 1, judgment: 0, trust: 0 },
     temptingVerdict: 'strong',
     referenceVerdict: 'misleading',
@@ -64,10 +55,6 @@ app.set('trust proxy', true);`,
     response: `Array.prototype.at is a method added in ES2022 that returns the element at a given index, supporting negative indices. It is conceptually similar to indexing with brackets but adds negative-index support and returns undefined for out-of-range indices rather than throwing.
 
 Historically, accessing the last element required arr[arr.length - 1], which is verbose and error-prone. The at method was proposed to address this, and it also works on strings and typed arrays. It does not mutate the array. It is not a replacement for slice or splice. It was standardised in TC39 and is available in all modern engines. [continues for 400 more words]`,
-    // Preamble is empty (0 — it launches into the answer without orienting the
-    // reader), reasoning is correct but buried (1), judgment is poor because
-    // the answer is disproportionate to the question (1), trust erodes because
-    // the reader has to skim to find the one-sentence answer (0).
     scores: { preamble: 0, reasoning: 1, judgment: 1, trust: 0 },
     temptingVerdict: 'strong',
     referenceVerdict: 'misleading',

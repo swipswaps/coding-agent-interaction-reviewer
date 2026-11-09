@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
 import data from './generated/matrix.json'
 
-const VERDICT_CLASS = {
-  strong: 'verdict--strong',
-  weak: 'verdict--weak',
-  misleading: 'verdict--misleading',
-}
+const VERDICT_CLASS = { strong: 'verdict--strong', weak: 'verdict--weak', misleading: 'verdict--misleading' }
 
 function VerdictBadge({ verdict }) {
   return <span className={`verdict ${VERDICT_CLASS[verdict] ?? ''}`}>{verdict}</span>
@@ -13,11 +9,7 @@ function VerdictBadge({ verdict }) {
 
 function ScoreBar({ score }) {
   const pct = (score / 2) * 100
-  return (
-    <div className="score-bar" role="img" aria-label={`score ${score} of 2`}>
-      <i style={{ width: `${pct}%` }} />
-    </div>
-  )
+  return <div className="score-bar" role="img" aria-label={`score ${score} of 2`}><i style={{ width: `${pct}%` }} /></div>
 }
 
 function TheCatch() {
@@ -42,15 +34,7 @@ function Matrix() {
   return (
     <div className="matrix-scroll">
       <table className="matrix" data-testid="matrix">
-        <thead>
-          <tr>
-            <th>interaction</th>
-            {dims.map((d) => <th key={d.id}>{d.label}</th>)}
-            <th>verdict</th>
-            <th>tempting</th>
-            <th>rejects?</th>
-          </tr>
-        </thead>
+        <thead><tr><th>interaction</th>{dims.map((d) => <th key={d.id}>{d.label}</th>)}<th>verdict</th><th>tempting</th><th>rejects?</th></tr></thead>
         <tbody>
           {rows.map((row) => (
             <tr key={row.interactionId} className={row.verdict === 'misleading' ? 'row-catch' : ''}>
@@ -87,15 +71,12 @@ export default function App() {
   const interactions = data.interactions ?? []
   const [selectedId, setSelectedId] = useState(interactions[0]?.id ?? null)
   const selected = useMemo(() => interactions.find((i) => i.id === selectedId) ?? interactions[0] ?? null, [interactions, selectedId])
-
   return (
     <div className="app">
       <header className="page-header">
         <p className="eyebrow">Coding-agent interaction review · preamble · reasoning · judgment · trust</p>
         <h1>The code runs. That is not the question.</h1>
-        <p className="page-sub">
-          A rubric for evaluating coding-agent interactions on four dimensions. The shortcut verdict says strong when the code works. This rubric rejects that shortcut on every interaction where it disagrees with the reference, and the discrimination matrix shows it.
-        </p>
+        <p className="page-sub">A rubric for evaluating coding-agent interactions on four dimensions. The shortcut verdict says strong when the code works. This rubric rejects that shortcut on every interaction where it disagrees with the reference, and the discrimination matrix shows it.</p>
         <dl className="stats">
           <div><dt>interactions</dt><dd>{s.total ?? 0}</dd></div>
           <div><dt>strong</dt><dd className="stat-ok">{s.strong ?? 0}</dd></div>
@@ -105,13 +86,8 @@ export default function App() {
           <div><dt>sound</dt><dd className={s.sound ? 'stat-ok' : 'stat-bad'}>{s.sound ? 'yes' : 'no'}</dd></div>
         </dl>
       </header>
-
       <main>
-        <section className="panel-block">
-          <h2 className="panel-heading">The catch</h2>
-          <TheCatch />
-        </section>
-
+        <section className="panel-block"><h2 className="panel-heading">The catch</h2><TheCatch /></section>
         <section className="panel-block">
           <h2 className="panel-heading">Interactions</h2>
           <nav className="interaction-nav">
@@ -123,13 +99,11 @@ export default function App() {
           </nav>
           <InteractionDetail interaction={selected} />
         </section>
-
         <section className="panel-block">
           <h2 className="panel-heading">Discrimination matrix</h2>
           <p className="panel-hint">Each dimension is scored 0–2. The verdict is derived from the scores, not from whether the code runs. The “rejects?” column is the claim: the rubric disagrees with the shortcut on every interaction where the shortcut is wrong.</p>
           <Matrix />
         </section>
-
         <section className="panel-block">
           <h2 className="panel-heading">Known limits</h2>
           <ul className="limits-list">
@@ -140,10 +114,7 @@ export default function App() {
           </ul>
         </section>
       </main>
-
-      <footer className="page-footer">
-        <p>Source: <a href="https://github.com/swipswaps/coding-agent-interaction-reviewer">github.com/swipswaps/coding-agent-interaction-reviewer</a> · raw: <a href="matrix.json" download>matrix.json</a></p>
-      </footer>
+      <footer className="page-footer"><p>Source: <a href="https://github.com/swipswaps/coding-agent-interaction-reviewer">github.com/swipswaps/coding-agent-interaction-reviewer</a> · raw: <a href="matrix.json" download>matrix.json</a></p></footer>
     </div>
   )
 }
