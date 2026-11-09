@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
-const BASE = 'http://localhost:4173/edge-case-solution-reviewer/'
+const BASE = 'http://localhost:4173/coding-agent-interaction-reviewer/'
 export default defineConfig({
   testDir: './tests', fullyParallel: true, forbidOnly: !!process.env.CI, retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['html', { open: 'never' }]] : 'list',

@@ -24,24 +24,18 @@ jobs:
               if isinstance(o, list):
                   return [strip(x) for x in o]
               return o
-          try:
-              committed = strip(json.load(open('/tmp/matrix-committed.json')))
-              fresh = strip(json.load(open('src/generated/matrix.json')))
-              public = strip(json.load(open('public/matrix.json')))
-          except Exception as e:
-              print(f'Could not compare matrices: {e}')
-              sys.exit(2)
+          committed = strip(json.load(open('/tmp/matrix-committed.json')))
+          fresh = strip(json.load(open('src/generated/matrix.json')))
+          public = strip(json.load(open('public/matrix.json')))
           if committed != fresh:
-              print('The committed matrix is stale (semantic content differs).')
-              print('Run npm run review locally and commit the result.')
-              sys.exit(2)
+              print('The committed matrix is stale.'); sys.exit(2)
           if fresh != public:
-              print('src/generated/matrix.json and public/matrix.json disagree.')
-              sys.exit(2)
+              print('src/generated and public disagree.'); sys.exit(2)
           print('Matrix is up to date.')
           PY
       - run: npm run build
       - uses: actions/configure-pages@v5
+      # [3] https://github.com/actions/upload-pages-artifact — v4 excludes dotfiles.
       - uses: actions/upload-pages-artifact@v4
         with: { path: ./dist }
   deploy:

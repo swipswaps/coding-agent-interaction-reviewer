@@ -1,1307 +1,290 @@
 {
-  "generatedAt": "2026-11-09T17:06:12.831Z",
+  "generatedAt": "2026-11-09T17:13:15.786Z",
   "generator": "scripts/review.mjs",
   "buildId": null,
-  "problems": [
+  "dimensions": [
     {
-      "id": "P1",
-      "title": "Longest substring without repeating characters",
-      "statement": "Given a string s, return the length of the longest substring without repeating characters. Constraints: 0 <= s.length <= 5 * 10^4.",
-      "visibleCount": 3,
-      "hiddenCount": 4,
-      "hiddenClasses": [
-        "empty-input",
-        "whitespace",
-        "pointer-jump",
-        "stale-index"
-      ]
+      "id": "preamble",
+      "label": "Preamble",
+      "question": "Does the preamble help the reader decide what to do, or is it noise?",
+      "weight": 0.25
     },
     {
-      "id": "P2",
-      "title": "Valid parentheses",
-      "statement": "Given a string s containing just ()[]{}, determine if the input string is valid. Constraints: 1 <= s.length <= 10^4.",
-      "visibleCount": 3,
-      "hiddenCount": 3,
-      "hiddenClasses": [
-        "unmatched-open",
-        "pop-empty",
-        "interleaved"
-      ]
+      "id": "reasoning",
+      "label": "Reasoning",
+      "question": "Does the explanation hold together, or does it assert without support?",
+      "weight": 0.25
     },
     {
-      "id": "P3",
-      "title": "Merge two sorted lists",
-      "statement": "Merge two sorted linked lists and return it as a sorted list.",
-      "visibleCount": 3,
-      "hiddenCount": 2,
-      "hiddenClasses": [
-        "first-list-bias",
-        "duplicate-drop"
-      ]
+      "id": "judgment",
+      "label": "Engineering judgment",
+      "question": "Does the response reflect how a strong engineer would think about the problem?",
+      "weight": 0.3
+    },
+    {
+      "id": "trust",
+      "label": "Trust calibration",
+      "question": "Would this interaction build or erode an experienced developer’s trust?",
+      "weight": 0.2
+    }
+  ],
+  "interactions": [
+    {
+      "id": "I1",
+      "label": "The confident refactor that silently changes behaviour",
+      "prompt": "Refactor this function to use a Map instead of an object for the cache. Keep behaviour identical.",
+      "response": "Here is the refactored version using a Map:\n\nfunction cacheLookup(cache, key) {\n  return cache.get(key) ?? null;\n}\n\nMaps are faster than objects for frequent lookups, and the API is cleaner. This should be a drop-in replacement.",
+      "scores": {
+        "preamble": 0,
+        "reasoning": 1,
+        "judgment": 0,
+        "trust": 0
+      },
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The code is syntactically fine and the function signature is unchanged, which is why the shortcut verdict says strong. But the original cache may have been an object with prototype keys, and `cache.get` does not exist on it. \"Drop-in replacement\" is a claim the response does not verify."
+    },
+    {
+      "id": "I2",
+      "label": "The honest \"I do not know\" with a concrete next step",
+      "prompt": "Why is this React component re-rendering on every keystroke even though the input is uncontrolled?",
+      "response": "I cannot tell from the snippet alone. The most likely causes, in order:\n\n1. The parent passes a new object or array prop on every render.\n2. A context value is created inline in the provider.\n3. A Zustand or Redux selector returns a new object each time.\n\nTo narrow it down, wrap the child in React.memo and log whether it re-renders. If it stops, the cause is a prop identity change. If it does not, the cause is context or a store subscription.\n\nI would rather tell you how to find it than guess at a fix.",
+      "scores": {
+        "preamble": 2,
+        "reasoning": 2,
+        "judgment": 2,
+        "trust": 2
+      },
+      "temptingVerdict": "weak",
+      "referenceVerdict": "strong",
+      "catches": "The shortcut verdict says weak because the response does not contain a fix. But the role asks for engineering taste, and the tasteful answer is to narrow the cause rather than guess. This is the case the rubric is built to defend."
+    },
+    {
+      "id": "I3",
+      "label": "The plausible-looking fix that would break in production",
+      "prompt": "Our Express rate limiter is not working behind the load balancer. Fix it.",
+      "response": "The rate limiter probably reads req.ip, which is the load balancer's IP behind a proxy. Set app.set('trust proxy', true) and the limiter will see the real client IP.\n\napp.set('trust proxy', true);",
+      "scores": {
+        "preamble": 1,
+        "reasoning": 1,
+        "judgment": 0,
+        "trust": 0
+      },
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The diagnosis is correct and the code is the commonly recommended fix, which is why the shortcut verdict says strong. But `trust proxy: true` trusts every proxy in the chain, including one an attacker controls. The safe answer is a hop count or a trusted subnet. The response names the right symptom and prescribes the wrong dose."
+    },
+    {
+      "id": "I4",
+      "label": "The over-explained answer to a simple question",
+      "prompt": "What does `Array.prototype.at` do?",
+      "response": "Array.prototype.at is a method added in ES2022 that returns the element at a given index, supporting negative indices. It is conceptually similar to indexing with brackets but adds negative-index support and returns undefined for out-of-range indices rather than throwing.\n\nHistorically, accessing the last element required arr[arr.length - 1], which is verbose and error-prone. The at method was proposed to address this, and it also works on strings and typed arrays. It does not mutate the array. It is not a replacement for slice or splice. It was standardised in TC39 and is available in all modern engines. [continues for 400 more words]",
+      "scores": {
+        "preamble": 0,
+        "reasoning": 1,
+        "judgment": 1,
+        "trust": 0
+      },
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The answer is factually correct and complete, which is why the shortcut verdict says strong. But the question was one sentence long and the answer is six paragraphs. Engineering judgment includes knowing when to stop. The response answers a question the user did not ask."
     }
   ],
   "matrix": [
     {
-      "problemId": "P1",
-      "candidateId": "ref",
-      "label": "Reference",
-      "role": "reference",
-      "visiblePass": true,
-      "hiddenPass": true,
-      "verdict": "correct",
-      "visible": [
+      "verdict": "misleading",
+      "percent": 13,
+      "detail": [
         {
-          "case": {
-            "input": "abcabcbb",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "preamble",
+          "label": "Preamble",
+          "score": 0,
+          "question": "Does the preamble help the reader decide what to do, or is it noise?"
         },
         {
-          "case": {
-            "input": "bbbbb",
-            "expected": 1
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
+          "id": "reasoning",
+          "label": "Reasoning",
+          "score": 1,
+          "question": "Does the explanation hold together, or does it assert without support?"
         },
         {
-          "case": {
-            "input": "pwwkew",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "judgment",
+          "label": "Engineering judgment",
+          "score": 0,
+          "question": "Does the response reflect how a strong engineer would think about the problem?"
+        },
+        {
+          "id": "trust",
+          "label": "Trust calibration",
+          "score": 0,
+          "question": "Would this interaction build or erode an experienced developer’s trust?"
         }
       ],
-      "hidden": [
-        {
-          "case": {
-            "input": "",
-            "expected": 0,
-            "catches": "Solutions that assume s.length >= 1.",
-            "class": "empty-input"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 0
-          }
-        },
-        {
-          "case": {
-            "input": " ",
-            "expected": 1,
-            "catches": "Solutions that strip whitespace.",
-            "class": "whitespace"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
-        },
-        {
-          "case": {
-            "input": "dvdf",
-            "expected": 3,
-            "catches": "Solutions that jump left to i.",
-            "class": "pointer-jump"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
-        },
-        {
-          "case": {
-            "input": "abba",
-            "expected": 2,
-            "catches": "Solutions that move left backwards.",
-            "class": "stale-index"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 2
-          }
-        }
-      ],
-      "firstHiddenFailure": null,
-      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
+      "interactionId": "I1",
+      "prompt": "Refactor this function to use a Map instead of an object for the cache. Keep behaviour identical.",
+      "response": "Here is the refactored version using a Map:\n\nfunction cacheLookup(cache, key) {\n  return cache.get(key) ?? null;\n}\n\nMaps are faster than objects for frequent lookups, and the API is cleaner. This should be a drop-in replacement.",
+      "label": "The confident refactor that silently changes behaviour",
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The code is syntactically fine and the function signature is unchanged, which is why the shortcut verdict says strong. But the original cache may have been an object with prototype keys, and `cache.get` does not exist on it. \"Drop-in replacement\" is a claim the response does not verify.",
+      "note": "Misleading: at least one dimension is absent. The code is syntactically fine and the function signature is unchanged, which is why the shortcut verdict says strong. But the original cache may have been an object with prototype keys, and `cache.get` does not exist on it. \"Drop-in replacement\" is a claim the response does not verify."
     },
     {
-      "problemId": "P1",
-      "candidateId": "A",
-      "label": "A — left can move backwards",
-      "role": "edge-case-candidate",
-      "visiblePass": true,
-      "hiddenPass": false,
-      "verdict": "edge-case-broken",
-      "visible": [
+      "verdict": "strong",
+      "percent": 100,
+      "detail": [
         {
-          "case": {
-            "input": "abcabcbb",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "preamble",
+          "label": "Preamble",
+          "score": 2,
+          "question": "Does the preamble help the reader decide what to do, or is it noise?"
         },
         {
-          "case": {
-            "input": "bbbbb",
-            "expected": 1
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
+          "id": "reasoning",
+          "label": "Reasoning",
+          "score": 2,
+          "question": "Does the explanation hold together, or does it assert without support?"
         },
         {
-          "case": {
-            "input": "pwwkew",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "judgment",
+          "label": "Engineering judgment",
+          "score": 2,
+          "question": "Does the response reflect how a strong engineer would think about the problem?"
+        },
+        {
+          "id": "trust",
+          "label": "Trust calibration",
+          "score": 2,
+          "question": "Would this interaction build or erode an experienced developer’s trust?"
         }
       ],
-      "hidden": [
-        {
-          "case": {
-            "input": "",
-            "expected": 0,
-            "catches": "Solutions that assume s.length >= 1.",
-            "class": "empty-input"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 0
-          }
-        },
-        {
-          "case": {
-            "input": " ",
-            "expected": 1,
-            "catches": "Solutions that strip whitespace.",
-            "class": "whitespace"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
-        },
-        {
-          "case": {
-            "input": "dvdf",
-            "expected": 3,
-            "catches": "Solutions that jump left to i.",
-            "class": "pointer-jump"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
-        },
-        {
-          "case": {
-            "input": "abba",
-            "expected": 2,
-            "catches": "Solutions that move left backwards.",
-            "class": "stale-index"
-          },
-          "result": {
-            "status": "fail",
-            "actual": 3,
-            "expected": 2
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": "abba",
-        "expected": 2,
-        "actual": 3,
-        "error": null,
-        "catches": "Solutions that move left backwards.",
-        "class": "stale-index"
-      },
-      "note": "Passes every visible test and fails on input \"abba\" (expected 2, got 3). Solutions that move left backwards."
+      "interactionId": "I2",
+      "prompt": "Why is this React component re-rendering on every keystroke even though the input is uncontrolled?",
+      "response": "I cannot tell from the snippet alone. The most likely causes, in order:\n\n1. The parent passes a new object or array prop on every render.\n2. A context value is created inline in the provider.\n3. A Zustand or Redux selector returns a new object each time.\n\nTo narrow it down, wrap the child in React.memo and log whether it re-renders. If it stops, the cause is a prop identity change. If it does not, the cause is context or a store subscription.\n\nI would rather tell you how to find it than guess at a fix.",
+      "label": "The honest \"I do not know\" with a concrete next step",
+      "temptingVerdict": "weak",
+      "referenceVerdict": "strong",
+      "catches": "The shortcut verdict says weak because the response does not contain a fix. But the role asks for engineering taste, and the tasteful answer is to narrow the cause rather than guess. This is the case the rubric is built to defend.",
+      "note": "Strong interaction: preamble is useful, reasoning holds, judgment reflects a senior engineer, and the response earns trust."
     },
     {
-      "problemId": "P1",
-      "candidateId": "A2",
-      "label": "A2 — left jumps to i",
-      "role": "edge-case-candidate",
-      "visiblePass": true,
-      "hiddenPass": false,
-      "verdict": "edge-case-broken",
-      "visible": [
+      "verdict": "misleading",
+      "percent": 25,
+      "detail": [
         {
-          "case": {
-            "input": "abcabcbb",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "preamble",
+          "label": "Preamble",
+          "score": 1,
+          "question": "Does the preamble help the reader decide what to do, or is it noise?"
         },
         {
-          "case": {
-            "input": "bbbbb",
-            "expected": 1
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
+          "id": "reasoning",
+          "label": "Reasoning",
+          "score": 1,
+          "question": "Does the explanation hold together, or does it assert without support?"
         },
         {
-          "case": {
-            "input": "pwwkew",
-            "expected": 3
-          },
-          "result": {
-            "status": "pass",
-            "actual": 3
-          }
+          "id": "judgment",
+          "label": "Engineering judgment",
+          "score": 0,
+          "question": "Does the response reflect how a strong engineer would think about the problem?"
+        },
+        {
+          "id": "trust",
+          "label": "Trust calibration",
+          "score": 0,
+          "question": "Would this interaction build or erode an experienced developer’s trust?"
         }
       ],
-      "hidden": [
-        {
-          "case": {
-            "input": "",
-            "expected": 0,
-            "catches": "Solutions that assume s.length >= 1.",
-            "class": "empty-input"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 0
-          }
-        },
-        {
-          "case": {
-            "input": " ",
-            "expected": 1,
-            "catches": "Solutions that strip whitespace.",
-            "class": "whitespace"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 1
-          }
-        },
-        {
-          "case": {
-            "input": "dvdf",
-            "expected": 3,
-            "catches": "Solutions that jump left to i.",
-            "class": "pointer-jump"
-          },
-          "result": {
-            "status": "fail",
-            "actual": 2,
-            "expected": 3
-          }
-        },
-        {
-          "case": {
-            "input": "abba",
-            "expected": 2,
-            "catches": "Solutions that move left backwards.",
-            "class": "stale-index"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 2
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": "dvdf",
-        "expected": 3,
-        "actual": 2,
-        "error": null,
-        "catches": "Solutions that jump left to i.",
-        "class": "pointer-jump"
-      },
-      "note": "Passes every visible test and fails on input \"dvdf\" (expected 3, got 2). Solutions that jump left to i."
+      "interactionId": "I3",
+      "prompt": "Our Express rate limiter is not working behind the load balancer. Fix it.",
+      "response": "The rate limiter probably reads req.ip, which is the load balancer's IP behind a proxy. Set app.set('trust proxy', true) and the limiter will see the real client IP.\n\napp.set('trust proxy', true);",
+      "label": "The plausible-looking fix that would break in production",
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The diagnosis is correct and the code is the commonly recommended fix, which is why the shortcut verdict says strong. But `trust proxy: true` trusts every proxy in the chain, including one an attacker controls. The safe answer is a hop count or a trusted subnet. The response names the right symptom and prescribes the wrong dose.",
+      "note": "Misleading: at least one dimension is absent. The diagnosis is correct and the code is the commonly recommended fix, which is why the shortcut verdict says strong. But `trust proxy: true` trusts every proxy in the chain, including one an attacker controls. The safe answer is a hop count or a trusted subnet. The response names the right symptom and prescribes the wrong dose."
     },
     {
-      "problemId": "P1",
-      "candidateId": "B",
-      "label": "B — off-by-one",
-      "role": "incorrect-candidate",
-      "visiblePass": false,
-      "hiddenPass": false,
-      "verdict": "incorrect",
-      "visible": [
+      "verdict": "misleading",
+      "percent": 28,
+      "detail": [
         {
-          "case": {
-            "input": "abcabcbb",
-            "expected": 3
-          },
-          "result": {
-            "status": "fail",
-            "actual": 2,
-            "expected": 3
-          }
+          "id": "preamble",
+          "label": "Preamble",
+          "score": 0,
+          "question": "Does the preamble help the reader decide what to do, or is it noise?"
         },
         {
-          "case": {
-            "input": "bbbbb",
-            "expected": 1
-          },
-          "result": {
-            "status": "fail",
-            "actual": 0,
-            "expected": 1
-          }
+          "id": "reasoning",
+          "label": "Reasoning",
+          "score": 1,
+          "question": "Does the explanation hold together, or does it assert without support?"
         },
         {
-          "case": {
-            "input": "pwwkew",
-            "expected": 3
-          },
-          "result": {
-            "status": "fail",
-            "actual": 2,
-            "expected": 3
-          }
+          "id": "judgment",
+          "label": "Engineering judgment",
+          "score": 1,
+          "question": "Does the response reflect how a strong engineer would think about the problem?"
+        },
+        {
+          "id": "trust",
+          "label": "Trust calibration",
+          "score": 0,
+          "question": "Would this interaction build or erode an experienced developer’s trust?"
         }
       ],
-      "hidden": [
-        {
-          "case": {
-            "input": "",
-            "expected": 0,
-            "catches": "Solutions that assume s.length >= 1.",
-            "class": "empty-input"
-          },
-          "result": {
-            "status": "pass",
-            "actual": 0
-          }
-        },
-        {
-          "case": {
-            "input": " ",
-            "expected": 1,
-            "catches": "Solutions that strip whitespace.",
-            "class": "whitespace"
-          },
-          "result": {
-            "status": "fail",
-            "actual": 0,
-            "expected": 1
-          }
-        },
-        {
-          "case": {
-            "input": "dvdf",
-            "expected": 3,
-            "catches": "Solutions that jump left to i.",
-            "class": "pointer-jump"
-          },
-          "result": {
-            "status": "fail",
-            "actual": 2,
-            "expected": 3
-          }
-        },
-        {
-          "case": {
-            "input": "abba",
-            "expected": 2,
-            "catches": "Solutions that move left backwards.",
-            "class": "stale-index"
-          },
-          "result": {
-            "status": "fail",
-            "actual": 1,
-            "expected": 2
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": " ",
-        "expected": 1,
-        "actual": 0,
-        "error": null,
-        "catches": "Solutions that strip whitespace.",
-        "class": "whitespace"
-      },
-      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "ref",
-      "label": "Reference",
-      "role": "reference",
-      "visiblePass": true,
-      "hiddenPass": true,
-      "verdict": "correct",
-      "visible": [
-        {
-          "case": {
-            "input": "()",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "()[]{}",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "(]",
-            "expected": false
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": "(",
-            "expected": false,
-            "catches": "No bracket match check.",
-            "class": "unmatched-open"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        },
-        {
-          "case": {
-            "input": "]",
-            "expected": false,
-            "catches": "Pop from empty stack.",
-            "class": "pop-empty"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        },
-        {
-          "case": {
-            "input": "([)]",
-            "expected": false,
-            "catches": "Counting instead of matching.",
-            "class": "interleaved"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        }
-      ],
-      "firstHiddenFailure": null,
-      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "A",
-      "label": "A — counts brackets",
-      "role": "edge-case-candidate",
-      "visiblePass": true,
-      "hiddenPass": false,
-      "verdict": "edge-case-broken",
-      "visible": [
-        {
-          "case": {
-            "input": "()",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "()[]{}",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "(]",
-            "expected": false
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": "(",
-            "expected": false,
-            "catches": "No bracket match check.",
-            "class": "unmatched-open"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        },
-        {
-          "case": {
-            "input": "]",
-            "expected": false,
-            "catches": "Pop from empty stack.",
-            "class": "pop-empty"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        },
-        {
-          "case": {
-            "input": "([)]",
-            "expected": false,
-            "catches": "Counting instead of matching.",
-            "class": "interleaved"
-          },
-          "result": {
-            "status": "fail",
-            "actual": true,
-            "expected": false
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": "([)]",
-        "expected": false,
-        "actual": true,
-        "error": null,
-        "catches": "Counting instead of matching.",
-        "class": "interleaved"
-      },
-      "note": "Passes every visible test and fails on input \"([)]\" (expected false, got true). Counting instead of matching."
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "B",
-      "label": "B — no match check",
-      "role": "incorrect-candidate",
-      "visiblePass": false,
-      "hiddenPass": false,
-      "verdict": "incorrect",
-      "visible": [
-        {
-          "case": {
-            "input": "()",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "()[]{}",
-            "expected": true
-          },
-          "result": {
-            "status": "pass",
-            "actual": true
-          }
-        },
-        {
-          "case": {
-            "input": "(]",
-            "expected": false
-          },
-          "result": {
-            "status": "fail",
-            "actual": true,
-            "expected": false
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": "(",
-            "expected": false,
-            "catches": "No bracket match check.",
-            "class": "unmatched-open"
-          },
-          "result": {
-            "status": "pass",
-            "actual": false
-          }
-        },
-        {
-          "case": {
-            "input": "]",
-            "expected": false,
-            "catches": "Pop from empty stack.",
-            "class": "pop-empty"
-          },
-          "result": {
-            "status": "fail",
-            "actual": true,
-            "expected": false
-          }
-        },
-        {
-          "case": {
-            "input": "([)]",
-            "expected": false,
-            "catches": "Counting instead of matching.",
-            "class": "interleaved"
-          },
-          "result": {
-            "status": "fail",
-            "actual": true,
-            "expected": false
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": "]",
-        "expected": false,
-        "actual": true,
-        "error": null,
-        "catches": "Pop from empty stack.",
-        "class": "pop-empty"
-      },
-      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "ref",
-      "label": "Reference",
-      "role": "reference",
-      "visiblePass": true,
-      "hiddenPass": true,
-      "verdict": "correct",
-      "visible": [
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                2,
-                4
-              ],
-              [
-                1,
-                3,
-                4
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              []
-            ],
-            "expected": []
-          },
-          "result": {
-            "status": "pass",
-            "actual": []
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              [
-                0
-              ]
-            ],
-            "expected": [
-              0
-            ]
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              0
-            ]
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": [
-              [
-                5
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": [
-              1,
-              2,
-              3,
-              5
-            ],
-            "catches": "First-list bias.",
-            "class": "first-list-bias"
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              2,
-              3,
-              5
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                1,
-                1
-              ],
-              [
-                1,
-                1
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ],
-            "catches": "Uses < not <=.",
-            "class": "duplicate-drop"
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ]
-          }
-        }
-      ],
-      "firstHiddenFailure": null,
-      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "A",
-      "label": "A — always starts with first list",
-      "role": "edge-case-candidate",
-      "visiblePass": true,
-      "hiddenPass": false,
-      "verdict": "edge-case-broken",
-      "visible": [
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                2,
-                4
-              ],
-              [
-                1,
-                3,
-                4
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              []
-            ],
-            "expected": []
-          },
-          "result": {
-            "status": "pass",
-            "actual": []
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              [
-                0
-              ]
-            ],
-            "expected": [
-              0
-            ]
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              0
-            ]
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": [
-              [
-                5
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": [
-              1,
-              2,
-              3,
-              5
-            ],
-            "catches": "First-list bias.",
-            "class": "first-list-bias"
-          },
-          "result": {
-            "status": "fail",
-            "actual": [
-              5,
-              1,
-              2,
-              3
-            ],
-            "expected": [
-              1,
-              2,
-              3,
-              5
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                1,
-                1
-              ],
-              [
-                1,
-                1
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ],
-            "catches": "Uses < not <=.",
-            "class": "duplicate-drop"
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ]
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": [
-          [
-            5
-          ],
-          [
-            1,
-            2,
-            3
-          ]
-        ],
-        "expected": [
-          1,
-          2,
-          3,
-          5
-        ],
-        "actual": [
-          5,
-          1,
-          2,
-          3
-        ],
-        "error": null,
-        "catches": "First-list bias.",
-        "class": "first-list-bias"
-      },
-      "note": "Passes every visible test and fails on input [[5],[1,2,3]] (expected [1,2,3,5], got [5,1,2,3]). First-list bias."
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "B",
-      "label": "B — reversed merge",
-      "role": "incorrect-candidate",
-      "visiblePass": false,
-      "hiddenPass": false,
-      "verdict": "incorrect",
-      "visible": [
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                2,
-                4
-              ],
-              [
-                1,
-                3,
-                4
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          },
-          "result": {
-            "status": "fail",
-            "actual": [
-              1,
-              3,
-              4,
-              1,
-              2,
-              4
-            ],
-            "expected": [
-              1,
-              1,
-              2,
-              3,
-              4,
-              4
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              []
-            ],
-            "expected": []
-          },
-          "result": {
-            "status": "pass",
-            "actual": []
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [],
-              [
-                0
-              ]
-            ],
-            "expected": [
-              0
-            ]
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              0
-            ]
-          }
-        }
-      ],
-      "hidden": [
-        {
-          "case": {
-            "input": [
-              [
-                5
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": [
-              1,
-              2,
-              3,
-              5
-            ],
-            "catches": "First-list bias.",
-            "class": "first-list-bias"
-          },
-          "result": {
-            "status": "fail",
-            "actual": [
-              5,
-              1,
-              2,
-              3
-            ],
-            "expected": [
-              1,
-              2,
-              3,
-              5
-            ]
-          }
-        },
-        {
-          "case": {
-            "input": [
-              [
-                1,
-                1,
-                1
-              ],
-              [
-                1,
-                1
-              ]
-            ],
-            "expected": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ],
-            "catches": "Uses < not <=.",
-            "class": "duplicate-drop"
-          },
-          "result": {
-            "status": "pass",
-            "actual": [
-              1,
-              1,
-              1,
-              1,
-              1
-            ]
-          }
-        }
-      ],
-      "firstHiddenFailure": {
-        "input": [
-          [
-            5
-          ],
-          [
-            1,
-            2,
-            3
-          ]
-        ],
-        "expected": [
-          1,
-          2,
-          3,
-          5
-        ],
-        "actual": [
-          5,
-          1,
-          2,
-          3
-        ],
-        "error": null,
-        "catches": "First-list bias.",
-        "class": "first-list-bias"
-      },
-      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
+      "interactionId": "I4",
+      "prompt": "What does `Array.prototype.at` do?",
+      "response": "Array.prototype.at is a method added in ES2022 that returns the element at a given index, supporting negative indices. It is conceptually similar to indexing with brackets but adds negative-index support and returns undefined for out-of-range indices rather than throwing.\n\nHistorically, accessing the last element required arr[arr.length - 1], which is verbose and error-prone. The at method was proposed to address this, and it also works on strings and typed arrays. It does not mutate the array. It is not a replacement for slice or splice. It was standardised in TC39 and is available in all modern engines. [continues for 400 more words]",
+      "label": "The over-explained answer to a simple question",
+      "temptingVerdict": "strong",
+      "referenceVerdict": "misleading",
+      "catches": "The answer is factually correct and complete, which is why the shortcut verdict says strong. But the question was one sentence long and the answer is six paragraphs. Engineering judgment includes knowing when to stop. The response answers a question the user did not ask.",
+      "note": "Misleading: at least one dimension is absent. The answer is factually correct and complete, which is why the shortcut verdict says strong. But the question was one sentence long and the answer is six paragraphs. Engineering judgment includes knowing when to stop. The response answers a question the user did not ask."
     }
   ],
-  "expectations": [
+  "checks": [
     {
-      "problemId": "P1",
-      "candidateId": "ref",
-      "declaredRole": "reference",
-      "actual": "correct",
-      "agree": true
+      "interactionId": "I1",
+      "tempting": "strong",
+      "reference": "misleading",
+      "measured": "misleading",
+      "rejectsTempting": true,
+      "matchesReference": true
     },
     {
-      "problemId": "P1",
-      "candidateId": "A",
-      "declaredRole": "edge-case-candidate",
-      "actual": "edge-case-broken",
-      "agree": true
+      "interactionId": "I2",
+      "tempting": "weak",
+      "reference": "strong",
+      "measured": "strong",
+      "rejectsTempting": true,
+      "matchesReference": true
     },
     {
-      "problemId": "P1",
-      "candidateId": "A2",
-      "declaredRole": "edge-case-candidate",
-      "actual": "edge-case-broken",
-      "agree": true
+      "interactionId": "I3",
+      "tempting": "strong",
+      "reference": "misleading",
+      "measured": "misleading",
+      "rejectsTempting": true,
+      "matchesReference": true
     },
     {
-      "problemId": "P1",
-      "candidateId": "B",
-      "declaredRole": "incorrect-candidate",
-      "actual": "incorrect",
-      "agree": true
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "ref",
-      "declaredRole": "reference",
-      "actual": "correct",
-      "agree": true
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "A",
-      "declaredRole": "edge-case-candidate",
-      "actual": "edge-case-broken",
-      "agree": true
-    },
-    {
-      "problemId": "P2",
-      "candidateId": "B",
-      "declaredRole": "incorrect-candidate",
-      "actual": "incorrect",
-      "agree": true
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "ref",
-      "declaredRole": "reference",
-      "actual": "correct",
-      "agree": true
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "A",
-      "declaredRole": "edge-case-candidate",
-      "actual": "edge-case-broken",
-      "agree": true
-    },
-    {
-      "problemId": "P3",
-      "candidateId": "B",
-      "declaredRole": "incorrect-candidate",
-      "actual": "incorrect",
-      "agree": true
+      "interactionId": "I4",
+      "tempting": "strong",
+      "reference": "misleading",
+      "measured": "misleading",
+      "rejectsTempting": true,
+      "matchesReference": true
     }
   ],
   "summary": {
-    "total": 10,
-    "correct": 3,
-    "edgeCaseBroken": 4,
-    "incorrect": 3,
-    "threw": 0,
-    "edgeCaseBrokenCandidates": [
-      "P1/A",
-      "P1/A2",
-      "P2/A",
-      "P3/A"
-    ],
-    "disagreements": 0,
+    "total": 4,
+    "strong": 1,
+    "weak": 0,
+    "misleading": 3,
+    "rejectsTempting": 4,
+    "matchesReference": 4,
     "sound": true
   }
 }

@@ -1,28 +1,47 @@
-EDGE-CASE SOLUTION REVIEWER
-===========================
+CODING-AGENT INTERACTION REVIEWER
+=================================
 
-A reviewer that runs candidate code solutions against the visible test suite,
-then against hidden cases derived from the problem's stated constraints. A
-candidate that passes the first and fails the second is reported as edge-case
-broken.
+A rubric for evaluating coding-agent interactions on four dimensions:
+preamble quality, reasoning soundness, engineering judgment, and trust
+calibration. The unit of evaluation is a (prompt, agent response) pair, not
+a solution.
 
-THE VERDICTS
+THE ARGUMENT
 ------------
 
-  correct            passes visible and hidden
-  edge-case-broken   passes visible, fails hidden
-  incorrect          fails visible with a wrong answer
-  throws             crashes on some case
+The shortcut verdict says "strong" when the code runs. That is not the
+question the role asks. The role asks whether the response reflects how a
+strong engineer would think. A response can produce correct code and still be
+a weak interaction, and a response can produce broken code and still be a
+strong one because the reasoning is honest.
 
-SANDBOX BOUNDARY
-----------------
+The rubric scores each dimension 0-2. The verdict is derived from the scores:
 
-The reviewer executes candidates in node:vm. The Node.js documentation states
-plainly: "The node:vm module is not a security mechanism. Do not use it to run
-untrusted code." https://nodejs.org/api/vm.html
+  strong       every dimension at least 1, and at least three at 2
+  misleading   any dimension at 0
+  weak         everything else
 
-The candidates in solutions/index.mjs are authored and committed. A production
-reviewer running model-generated candidates would need a subprocess boundary.
+The discrimination matrix shows that the rubric rejects the shortcut verdict
+on every interaction where the shortcut is wrong.
+
+THE FOUR INTERACTIONS
+---------------------
+
+I1  The confident refactor that silently changes behaviour
+    Tempting: strong (the code is syntactically fine).
+    Measured: misleading (the "drop-in replacement" claim is unverified).
+
+I2  The honest "I do not know" with a concrete next step
+    Tempting: weak (there is no fix in the response).
+    Measured: strong (narrowing the cause is the tasteful answer).
+
+I3  The plausible fix that would break in production
+    Tempting: strong (the diagnosis is correct).
+    Measured: misleading (trust proxy: true trusts every hop).
+
+I4  The over-explained answer to a simple question
+    Tempting: strong (the answer is factually correct).
+    Measured: misleading (the answer is disproportionate to the question).
 
 RUN IT
 ------
@@ -32,6 +51,9 @@ RUN IT
     npm run build
     npm run preview
 
+The review script writes src/generated/matrix.json for the app and
+public/matrix.json for direct download.
+
 TEST IT
 -------
 
@@ -39,36 +61,15 @@ TEST IT
     npx playwright test
 
 Visual baselines must be generated inside the pinned Playwright image.
-https://playwright.dev/docs/test-snapshots
-The verify workflow runs in mcr.microsoft.com/playwright, version pinned by the
-scaffold script to match @playwright/test.
-
-MATRIX PROVENANCE
------------------
-
-The committed matrix contains two non-deterministic fields:
-
-  generatedAt   wall-clock time of the run that produced the matrix
-  buildId       GITHUB_SHA on CI, null locally
-
-The deploy workflow's staleness check compares everything except those two, so
-a commit produced by a local run and a matrix regenerated in CI agree on the
-semantic content even though their timestamps differ.
-
-PAGES BUILD RECORD
-------------------
-
-The /repos/{owner}/{repo}/pages/builds/latest endpoint returns 404 for a site
-whose Pages was enabled with build_type=workflow. That endpoint reports the
-legacy branch-build state; workflow builds deploy an artefact via
-actions/deploy-pages@v4 and never produce a record there. The scaffold script
-treats the 404 as expected and relies on the site probe, which fetches the
-served HTML, the hashed bundle, and the matrix data to confirm the deployment.
+The verify workflow runs in mcr.microsoft.com/playwright, version pinned by
+the scaffold script to match @playwright/test.
 
 KNOWN LIMITS
 ------------
 
-- JavaScript only.
-- Hidden cases are not exhaustive.
-- node:vm is not a security boundary.
-- No style, complexity or explanation judgement.
+- Four interactions is a demonstration of the rubric, not a benchmark.
+- The scores are authored, not measured. A production version needs
+  inter-rater agreement data.
+- The verdict thresholds are choices, stated so they can be argued with.
+- No Codex, Claude Code, or Cursor transcript is included. The interactions
+  are representative of the class, not captured from a live tool.

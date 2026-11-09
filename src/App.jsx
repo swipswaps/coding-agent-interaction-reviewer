@@ -1,95 +1,149 @@
 import { useMemo, useState } from 'react'
 import data from './generated/matrix.json'
-const VERDICT_LABEL = { correct: 'correct', 'edge-case-broken': 'edge-case broken', incorrect: 'incorrect', throws: 'throws' }
-function VerdictBadge({ verdict }) { return <span className={`badge badge--${verdict}`}>{VERDICT_LABEL[verdict] ?? verdict}</span> }
+
+const VERDICT_CLASS = {
+  strong: 'verdict--strong',
+  weak: 'verdict--weak',
+  misleading: 'verdict--misleading',
+}
+
+function VerdictBadge({ verdict }) {
+  return <span className={`verdict ${VERDICT_CLASS[verdict] ?? ''}`}>{verdict}</span>
+}
+
+function ScoreBar({ score }) {
+  const pct = (score / 2) * 100
+  return (
+    <div className="score-bar" role="img" aria-label={`score ${score} of 2`}>
+      <i style={{ width: `${pct}%` }} />
+    </div>
+  )
+}
+
 function TheCatch() {
-  const broken = (data.matrix ?? []).filter((r) => r.verdict === 'edge-case-broken')
-  if (broken.length === 0) return <p className="empty-state">No edge-case candidates caught.</p>
-  const first = broken[0]
-  const problem = (data.problems ?? []).find((p) => p.id === first.problemId)
+  const misleading = (data.matrix ?? []).filter((r) => r.verdict === 'misleading')
+  if (misleading.length === 0) return <p className="empty-state">No misleading interactions caught.</p>
+  const first = misleading[0]
+  const interaction = (data.interactions ?? []).find((i) => i.id === first.interactionId)
   return (
     <div className="catch" data-testid="catch">
-      <p className="catch-kicker">{broken.length} candidate(s) pass every visible test and are still wrong</p>
-      <p><strong>{first.problemId}</strong> {problem?.title}</p>
-      <p><strong>{first.candidateId}</strong> — {first.label}</p>
-      {first.firstHiddenFailure ? (
-        <dl className="catch-grid">
-          <dt>hidden input</dt><dd><code>{JSON.stringify(first.firstHiddenFailure.input)}</code></dd>
-          <dt>expected</dt><dd><code>{JSON.stringify(first.firstHiddenFailure.expected)}</code></dd>
-          <dt>got</dt><dd><code>{JSON.stringify(first.firstHiddenFailure.actual)}</code></dd>
-          <dt>catches</dt><dd>{first.firstHiddenFailure.catches}</dd>
-        </dl>
-      ) : null}
+      <p className="catch-kicker">{misleading.length} interaction(s) would be marked strong by the shortcut, and are not</p>
+      <p><strong>{first.interactionId}</strong> {interaction?.label}</p>
+      <p className="catch-prompt"><span className="label">prompt</span> {interaction?.prompt}</p>
       <p className="catch-note" data-testid="catch-note">{first.note}</p>
     </div>
   )
 }
-function MatrixTable() {
-  const rows = data.matrix ?? []; const problems = data.problems ?? []
+
+function Matrix() {
+  const rows = data.matrix ?? []
+  const dims = data.dimensions ?? []
   if (rows.length === 0) return <p className="empty-state">No matrix yet. Run npm run review.</p>
   return (
-    <div className="matrix-scroll"><table className="matrix" data-testid="matrix">
-      <thead><tr><th>problem</th><th>candidate</th><th>visible</th><th>hidden</th><th>verdict</th></tr></thead>
-      <tbody>
-        {problems.map((problem) => rows.filter((r) => r.problemId === problem.id).map((row, i) => (
-          <tr key={`${row.problemId}-${row.candidateId}`} className={row.verdict === 'edge-case-broken' ? 'row-catch' : ''}>
-            <th scope="row">{i === 0 ? <><span className="problem-id">{problem.id}</span><span className="problem-title">{problem.title}</span></> : null}</th>
-            <td><span className="cand-id">{row.candidateId}</span><span className="cand-label">{row.label}</span></td>
-            <td className={`cell ${row.visiblePass ? 'cell--pass' : 'cell--fail'}`}>{row.visiblePass ? 'PASS' : 'FAIL'}</td>
-            <td className={`cell ${row.hiddenPass ? 'cell--pass' : 'cell--fail'}`}>{row.hiddenPass ? 'PASS' : 'FAIL'}</td>
-            <td><VerdictBadge verdict={row.verdict} /></td>
+    <div className="matrix-scroll">
+      <table className="matrix" data-testid="matrix">
+        <thead>
+          <tr>
+            <th>interaction</th>
+            {dims.map((d) => <th key={d.id}>{d.label}</th>)}
+            <th>verdict</th>
+            <th>tempting</th>
+            <th>rejects?</th>
           </tr>
-        )))}
-      </tbody>
-    </table></div>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.interactionId} className={row.verdict === 'misleading' ? 'row-catch' : ''}>
+              <th scope="row"><span className="iid">{row.interactionId}</span> {row.label}</th>
+              {dims.map((d) => {
+                const detail = row.detail?.find((x) => x.id === d.id)
+                return <td key={d.id} className="cell"><ScoreBar score={detail?.score ?? 0} /><span className="score-num">{detail?.score ?? 0}</span></td>
+              })}
+              <td><VerdictBadge verdict={row.verdict} /></td>
+              <td className="cell cell--tempting">{row.temptingVerdict}</td>
+              <td className={`cell ${row.verdict !== row.temptingVerdict ? 'cell--pass' : 'cell--fail'}`}>{row.verdict !== row.temptingVerdict ? 'yes' : 'no'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
-function ReviewNotes() {
-  const broken = (data.matrix ?? []).filter((r) => r.verdict === 'edge-case-broken')
-  if (broken.length === 0) return null
-  return (<section className="panel-block"><h2 className="panel-heading">Review notes</h2>
-    <ul className="notes">{broken.map((row) => (<li key={`${row.problemId}-${row.candidateId}`} className="note"><span className="note-id">{row.problemId}/{row.candidateId}</span><span className="note-text">{row.note}</span></li>))}</ul>
-  </section>)
+
+function InteractionDetail({ interaction }) {
+  if (!interaction) return null
+  return (
+    <article className="interaction" data-testid="interaction-detail">
+      <p className="interaction-label">{interaction.label}</p>
+      <p className="interaction-prompt"><span className="label">prompt</span> {interaction.prompt}</p>
+      <pre className="interaction-response">{interaction.response}</pre>
+      <p className="interaction-catches"><span className="label">what the rubric catches</span> {interaction.catches}</p>
+    </article>
+  )
 }
+
 export default function App() {
-  const s = data.summary ?? {}; const problems = data.problems ?? []
-  const [selectedId, setSelectedId] = useState(problems[0]?.id ?? null)
-  const selected = useMemo(() => problems.find((p) => p.id === selectedId) ?? problems[0] ?? null, [problems, selectedId])
-  const selectedRows = (data.matrix ?? []).filter((r) => r.problemId === selectedId)
+  const s = data.summary ?? {}
+  const interactions = data.interactions ?? []
+  const [selectedId, setSelectedId] = useState(interactions[0]?.id ?? null)
+  const selected = useMemo(() => interactions.find((i) => i.id === selectedId) ?? interactions[0] ?? null, [interactions, selectedId])
+
   return (
     <div className="app">
       <header className="page-header">
-        <p className="eyebrow">Solution review · visible tests · hidden edge cases</p>
-        <h1>The solution that passes every test you showed it</h1>
-        <p className="page-sub">Runs candidate code against visible tests and hidden edge cases derived from the stated constraints. A candidate that passes the first and fails the second is reported as edge-case broken.</p>
+        <p className="eyebrow">Coding-agent interaction review · preamble · reasoning · judgment · trust</p>
+        <h1>The code runs. That is not the question.</h1>
+        <p className="page-sub">
+          A rubric for evaluating coding-agent interactions on four dimensions. The shortcut verdict says strong when the code works. This rubric rejects that shortcut on every interaction where it disagrees with the reference, and the discrimination matrix shows it.
+        </p>
         <dl className="stats">
-          <div><dt>candidates</dt><dd>{s.total ?? 0}</dd></div>
-          <div><dt>edge-case broken</dt><dd className="stat-bad" data-testid="stat-broken">{s.edgeCaseBroken ?? 0}</dd></div>
-          <div><dt>incorrect</dt><dd>{s.incorrect ?? 0}</dd></div>
-          <div><dt>correct</dt><dd className="stat-ok">{s.correct ?? 0}</dd></div>
+          <div><dt>interactions</dt><dd>{s.total ?? 0}</dd></div>
+          <div><dt>strong</dt><dd className="stat-ok">{s.strong ?? 0}</dd></div>
+          <div><dt>weak</dt><dd>{s.weak ?? 0}</dd></div>
+          <div><dt>misleading</dt><dd className="stat-bad">{s.misleading ?? 0}</dd></div>
+          <div><dt>rejects tempting</dt><dd className={s.sound ? 'stat-ok' : 'stat-bad'}>{s.rejectsTempting ?? 0}/{s.total ?? 0}</dd></div>
           <div><dt>sound</dt><dd className={s.sound ? 'stat-ok' : 'stat-bad'}>{s.sound ? 'yes' : 'no'}</dd></div>
         </dl>
       </header>
+
       <main>
-        <section className="panel-block"><h2 className="panel-heading">The catch</h2><TheCatch /></section>
         <section className="panel-block">
-          <h2 className="panel-heading">Problems</h2>
-          <nav className="problem-nav">{problems.map((p) => (<button key={p.id} type="button" className={`problem-tab ${p.id === selectedId ? 'is-active' : ''}`} onClick={() => setSelectedId(p.id)} aria-pressed={p.id === selectedId}><span className="tab-id">{p.id}</span><span className="tab-title">{p.title}</span></button>))}</nav>
-          {selected ? (<article className="problem" data-testid="problem-detail"><h3>{selected.title}</h3><p className="problem-statement">{selected.statement}</p>
-            <table className="detail-table"><thead><tr><th>candidate</th><th>visible</th><th>hidden</th><th>verdict</th></tr></thead>
-              <tbody>{selectedRows.map((row) => (<tr key={row.candidateId}><th scope="row"><span className="cand-id">{row.candidateId}</span> {row.label}</th>
-                <td className={`cell ${row.visiblePass ? 'cell--pass' : 'cell--fail'}`}>{row.visiblePass ? 'PASS' : 'FAIL'}</td>
-                <td className={`cell ${row.hiddenPass ? 'cell--pass' : 'cell--fail'}`}>{row.hiddenPass ? 'PASS' : 'FAIL'}</td>
-                <td><VerdictBadge verdict={row.verdict} /></td></tr>))}</tbody></table></article>) : null}
+          <h2 className="panel-heading">The catch</h2>
+          <TheCatch />
         </section>
-        <section className="panel-block"><h2 className="panel-heading">Full matrix</h2><MatrixTable /></section>
-        <ReviewNotes />
-        <section className="panel-block"><h2 className="panel-heading">Known limits</h2><ul className="limits-list">
-          <li>JavaScript only.</li><li>Hidden cases are not exhaustive.</li>
-          <li>node:vm is not a security boundary.</li><li>No style or complexity judgement.</li>
-        </ul></section>
+
+        <section className="panel-block">
+          <h2 className="panel-heading">Interactions</h2>
+          <nav className="interaction-nav">
+            {interactions.map((i) => (
+              <button key={i.id} type="button" className={`interaction-tab ${i.id === selectedId ? 'is-active' : ''}`} onClick={() => setSelectedId(i.id)} aria-pressed={i.id === selectedId}>
+                <span className="tab-id">{i.id}</span><span className="tab-label">{i.label}</span>
+              </button>
+            ))}
+          </nav>
+          <InteractionDetail interaction={selected} />
+        </section>
+
+        <section className="panel-block">
+          <h2 className="panel-heading">Discrimination matrix</h2>
+          <p className="panel-hint">Each dimension is scored 0–2. The verdict is derived from the scores, not from whether the code runs. The “rejects?” column is the claim: the rubric disagrees with the shortcut on every interaction where the shortcut is wrong.</p>
+          <Matrix />
+        </section>
+
+        <section className="panel-block">
+          <h2 className="panel-heading">Known limits</h2>
+          <ul className="limits-list">
+            <li>Four interactions is a demonstration of the rubric, not a benchmark. A real evaluation queue needs dozens, across languages and agent tools.</li>
+            <li>The scores are authored, not measured. The rubric is a scoring scheme, not a classifier; a production version would need inter-rater agreement data.</li>
+            <li>The verdict derivation is stated so it can be argued with. “Strong” requires every dimension at least 1 and at least three at 2; “misleading” requires any dimension at 0. Those thresholds are choices.</li>
+            <li>No Codex, Claude Code, or Cursor transcript is included. The interactions are representative of the class, not captured from a live tool.</li>
+          </ul>
+        </section>
       </main>
-      <footer className="page-footer"><p>Source: <a href="https://github.com/swipswaps/edge-case-solution-reviewer">github.com/swipswaps/edge-case-solution-reviewer</a> · raw: <a href="matrix.json" download>matrix.json</a></p></footer>
+
+      <footer className="page-footer">
+        <p>Source: <a href="https://github.com/swipswaps/coding-agent-interaction-reviewer">github.com/swipswaps/coding-agent-interaction-reviewer</a> · raw: <a href="matrix.json" download>matrix.json</a></p>
+      </footer>
     </div>
   )
 }

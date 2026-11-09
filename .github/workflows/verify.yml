@@ -6,9 +6,7 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     container:
-      # [8] https://github.com/microsoft/playwright/pkgs/container/playwright
-      # [BUG-C] This image tag is rewritten by the scaffold script to match the
-      # installed @playwright/test version.
+      # [6] https://github.com/microsoft/playwright/pkgs/container/playwright
       image: mcr.microsoft.com/playwright:v1.65.0-noble
     steps:
       - uses: actions/checkout@v4
