@@ -55,6 +55,16 @@ The deploy workflow's staleness check compares everything except those two, so
 a commit produced by a local run and a matrix regenerated in CI agree on the
 semantic content even though their timestamps differ.
 
+PAGES BUILD RECORD
+------------------
+
+The /repos/{owner}/{repo}/pages/builds/latest endpoint returns 404 for a site
+whose Pages was enabled with build_type=workflow. That endpoint reports the
+legacy branch-build state; workflow builds deploy an artefact via
+actions/deploy-pages@v4 and never produce a record there. The scaffold script
+treats the 404 as expected and relies on the site probe, which fetches the
+served HTML, the hashed bundle, and the matrix data to confirm the deployment.
+
 KNOWN LIMITS
 ------------
 
