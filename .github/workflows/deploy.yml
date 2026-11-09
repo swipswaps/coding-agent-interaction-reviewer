@@ -1,0 +1,33 @@
+name: deploy
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+permissions: { contents: read, pages: write, id-token: write }
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run review
+      - name: fail if the committed matrix is stale
+        run: |
+          if ! git diff --quiet -- src/generated/matrix.json public/matrix.json; then
+            echo "The committed matrix is stale."
+            exit 2
+          fi
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      # [3] https://github.com/actions/upload-pages-artifact — v4 excludes dotfiles.
+      - uses: actions/upload-pages-artifact@v4
+        with: { path: ./dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deployment.outputs.page_url }}' }
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

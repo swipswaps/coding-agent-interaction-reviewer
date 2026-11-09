@@ -1,0 +1,23 @@
+name: verify
+on:
+  pull_request: { branches: [main] }
+permissions: { contents: read }
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    container:
+      # [8] https://github.com/microsoft/playwright/pkgs/container/playwright
+      # [BUG-C] This image tag is rewritten by the scaffold script to match the
+      # installed @playwright/test version. A mismatch between this tag and the
+      # container the baselines were generated in causes false visual failures
+      # on the first PR.
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run review
+      - run: npm run build
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: playwright-report/ }

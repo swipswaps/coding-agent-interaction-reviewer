@@ -1,0 +1,1307 @@
+{
+  "generatedAt": "2026-11-09T16:43:34.164Z",
+  "generator": "scripts/review.mjs",
+  "buildId": null,
+  "problems": [
+    {
+      "id": "P1",
+      "title": "Longest substring without repeating characters",
+      "statement": "Given a string s, return the length of the longest substring without repeating characters. Constraints: 0 <= s.length <= 5 * 10^4.",
+      "visibleCount": 3,
+      "hiddenCount": 4,
+      "hiddenClasses": [
+        "empty-input",
+        "whitespace",
+        "pointer-jump",
+        "stale-index"
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Valid parentheses",
+      "statement": "Given a string s containing just ()[]{}, determine if the input string is valid. Constraints: 1 <= s.length <= 10^4.",
+      "visibleCount": 3,
+      "hiddenCount": 3,
+      "hiddenClasses": [
+        "unmatched-open",
+        "pop-empty",
+        "interleaved"
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Merge two sorted lists",
+      "statement": "Merge two sorted linked lists and return it as a sorted list.",
+      "visibleCount": 3,
+      "hiddenCount": 2,
+      "hiddenClasses": [
+        "first-list-bias",
+        "duplicate-drop"
+      ]
+    }
+  ],
+  "matrix": [
+    {
+      "problemId": "P1",
+      "candidateId": "ref",
+      "label": "Reference",
+      "role": "reference",
+      "visiblePass": true,
+      "hiddenPass": true,
+      "verdict": "correct",
+      "visible": [
+        {
+          "case": {
+            "input": "abcabcbb",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        },
+        {
+          "case": {
+            "input": "bbbbb",
+            "expected": 1
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "pwwkew",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "",
+            "expected": 0,
+            "catches": "Solutions that assume s.length >= 1.",
+            "class": "empty-input"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 0
+          }
+        },
+        {
+          "case": {
+            "input": " ",
+            "expected": 1,
+            "catches": "Solutions that strip whitespace.",
+            "class": "whitespace"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "dvdf",
+            "expected": 3,
+            "catches": "Solutions that jump left to i.",
+            "class": "pointer-jump"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        },
+        {
+          "case": {
+            "input": "abba",
+            "expected": 2,
+            "catches": "Solutions that move left backwards.",
+            "class": "stale-index"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 2
+          }
+        }
+      ],
+      "firstHiddenFailure": null,
+      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "A",
+      "label": "A — left can move backwards",
+      "role": "edge-case-candidate",
+      "visiblePass": true,
+      "hiddenPass": false,
+      "verdict": "edge-case-broken",
+      "visible": [
+        {
+          "case": {
+            "input": "abcabcbb",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        },
+        {
+          "case": {
+            "input": "bbbbb",
+            "expected": 1
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "pwwkew",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "",
+            "expected": 0,
+            "catches": "Solutions that assume s.length >= 1.",
+            "class": "empty-input"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 0
+          }
+        },
+        {
+          "case": {
+            "input": " ",
+            "expected": 1,
+            "catches": "Solutions that strip whitespace.",
+            "class": "whitespace"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "dvdf",
+            "expected": 3,
+            "catches": "Solutions that jump left to i.",
+            "class": "pointer-jump"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        },
+        {
+          "case": {
+            "input": "abba",
+            "expected": 2,
+            "catches": "Solutions that move left backwards.",
+            "class": "stale-index"
+          },
+          "result": {
+            "status": "fail",
+            "actual": 3,
+            "expected": 2
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": "abba",
+        "expected": 2,
+        "actual": 3,
+        "error": null,
+        "catches": "Solutions that move left backwards.",
+        "class": "stale-index"
+      },
+      "note": "Passes every visible test and fails on input \"abba\" (expected 2, got 3). Solutions that move left backwards."
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "A2",
+      "label": "A2 — left jumps to i",
+      "role": "edge-case-candidate",
+      "visiblePass": true,
+      "hiddenPass": false,
+      "verdict": "edge-case-broken",
+      "visible": [
+        {
+          "case": {
+            "input": "abcabcbb",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        },
+        {
+          "case": {
+            "input": "bbbbb",
+            "expected": 1
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "pwwkew",
+            "expected": 3
+          },
+          "result": {
+            "status": "pass",
+            "actual": 3
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "",
+            "expected": 0,
+            "catches": "Solutions that assume s.length >= 1.",
+            "class": "empty-input"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 0
+          }
+        },
+        {
+          "case": {
+            "input": " ",
+            "expected": 1,
+            "catches": "Solutions that strip whitespace.",
+            "class": "whitespace"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 1
+          }
+        },
+        {
+          "case": {
+            "input": "dvdf",
+            "expected": 3,
+            "catches": "Solutions that jump left to i.",
+            "class": "pointer-jump"
+          },
+          "result": {
+            "status": "fail",
+            "actual": 2,
+            "expected": 3
+          }
+        },
+        {
+          "case": {
+            "input": "abba",
+            "expected": 2,
+            "catches": "Solutions that move left backwards.",
+            "class": "stale-index"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 2
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": "dvdf",
+        "expected": 3,
+        "actual": 2,
+        "error": null,
+        "catches": "Solutions that jump left to i.",
+        "class": "pointer-jump"
+      },
+      "note": "Passes every visible test and fails on input \"dvdf\" (expected 3, got 2). Solutions that jump left to i."
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "B",
+      "label": "B — off-by-one",
+      "role": "incorrect-candidate",
+      "visiblePass": false,
+      "hiddenPass": false,
+      "verdict": "incorrect",
+      "visible": [
+        {
+          "case": {
+            "input": "abcabcbb",
+            "expected": 3
+          },
+          "result": {
+            "status": "fail",
+            "actual": 2,
+            "expected": 3
+          }
+        },
+        {
+          "case": {
+            "input": "bbbbb",
+            "expected": 1
+          },
+          "result": {
+            "status": "fail",
+            "actual": 0,
+            "expected": 1
+          }
+        },
+        {
+          "case": {
+            "input": "pwwkew",
+            "expected": 3
+          },
+          "result": {
+            "status": "fail",
+            "actual": 2,
+            "expected": 3
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "",
+            "expected": 0,
+            "catches": "Solutions that assume s.length >= 1.",
+            "class": "empty-input"
+          },
+          "result": {
+            "status": "pass",
+            "actual": 0
+          }
+        },
+        {
+          "case": {
+            "input": " ",
+            "expected": 1,
+            "catches": "Solutions that strip whitespace.",
+            "class": "whitespace"
+          },
+          "result": {
+            "status": "fail",
+            "actual": 0,
+            "expected": 1
+          }
+        },
+        {
+          "case": {
+            "input": "dvdf",
+            "expected": 3,
+            "catches": "Solutions that jump left to i.",
+            "class": "pointer-jump"
+          },
+          "result": {
+            "status": "fail",
+            "actual": 2,
+            "expected": 3
+          }
+        },
+        {
+          "case": {
+            "input": "abba",
+            "expected": 2,
+            "catches": "Solutions that move left backwards.",
+            "class": "stale-index"
+          },
+          "result": {
+            "status": "fail",
+            "actual": 1,
+            "expected": 2
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": " ",
+        "expected": 1,
+        "actual": 0,
+        "error": null,
+        "catches": "Solutions that strip whitespace.",
+        "class": "whitespace"
+      },
+      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "ref",
+      "label": "Reference",
+      "role": "reference",
+      "visiblePass": true,
+      "hiddenPass": true,
+      "verdict": "correct",
+      "visible": [
+        {
+          "case": {
+            "input": "()",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "()[]{}",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "(]",
+            "expected": false
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "(",
+            "expected": false,
+            "catches": "No bracket match check.",
+            "class": "unmatched-open"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        },
+        {
+          "case": {
+            "input": "]",
+            "expected": false,
+            "catches": "Pop from empty stack.",
+            "class": "pop-empty"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        },
+        {
+          "case": {
+            "input": "([)]",
+            "expected": false,
+            "catches": "Counting instead of matching.",
+            "class": "interleaved"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        }
+      ],
+      "firstHiddenFailure": null,
+      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "A",
+      "label": "A — counts brackets",
+      "role": "edge-case-candidate",
+      "visiblePass": true,
+      "hiddenPass": false,
+      "verdict": "edge-case-broken",
+      "visible": [
+        {
+          "case": {
+            "input": "()",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "()[]{}",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "(]",
+            "expected": false
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "(",
+            "expected": false,
+            "catches": "No bracket match check.",
+            "class": "unmatched-open"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        },
+        {
+          "case": {
+            "input": "]",
+            "expected": false,
+            "catches": "Pop from empty stack.",
+            "class": "pop-empty"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        },
+        {
+          "case": {
+            "input": "([)]",
+            "expected": false,
+            "catches": "Counting instead of matching.",
+            "class": "interleaved"
+          },
+          "result": {
+            "status": "fail",
+            "actual": true,
+            "expected": false
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": "([)]",
+        "expected": false,
+        "actual": true,
+        "error": null,
+        "catches": "Counting instead of matching.",
+        "class": "interleaved"
+      },
+      "note": "Passes every visible test and fails on input \"([)]\" (expected false, got true). Counting instead of matching."
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "B",
+      "label": "B — no match check",
+      "role": "incorrect-candidate",
+      "visiblePass": false,
+      "hiddenPass": false,
+      "verdict": "incorrect",
+      "visible": [
+        {
+          "case": {
+            "input": "()",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "()[]{}",
+            "expected": true
+          },
+          "result": {
+            "status": "pass",
+            "actual": true
+          }
+        },
+        {
+          "case": {
+            "input": "(]",
+            "expected": false
+          },
+          "result": {
+            "status": "fail",
+            "actual": true,
+            "expected": false
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": "(",
+            "expected": false,
+            "catches": "No bracket match check.",
+            "class": "unmatched-open"
+          },
+          "result": {
+            "status": "pass",
+            "actual": false
+          }
+        },
+        {
+          "case": {
+            "input": "]",
+            "expected": false,
+            "catches": "Pop from empty stack.",
+            "class": "pop-empty"
+          },
+          "result": {
+            "status": "fail",
+            "actual": true,
+            "expected": false
+          }
+        },
+        {
+          "case": {
+            "input": "([)]",
+            "expected": false,
+            "catches": "Counting instead of matching.",
+            "class": "interleaved"
+          },
+          "result": {
+            "status": "fail",
+            "actual": true,
+            "expected": false
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": "]",
+        "expected": false,
+        "actual": true,
+        "error": null,
+        "catches": "Pop from empty stack.",
+        "class": "pop-empty"
+      },
+      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "ref",
+      "label": "Reference",
+      "role": "reference",
+      "visiblePass": true,
+      "hiddenPass": true,
+      "verdict": "correct",
+      "visible": [
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                2,
+                4
+              ],
+              [
+                1,
+                3,
+                4
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              []
+            ],
+            "expected": []
+          },
+          "result": {
+            "status": "pass",
+            "actual": []
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              [
+                0
+              ]
+            ],
+            "expected": [
+              0
+            ]
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              0
+            ]
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": [
+              [
+                5
+              ],
+              [
+                1,
+                2,
+                3
+              ]
+            ],
+            "expected": [
+              1,
+              2,
+              3,
+              5
+            ],
+            "catches": "First-list bias.",
+            "class": "first-list-bias"
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              2,
+              3,
+              5
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "catches": "Uses < not <=.",
+            "class": "duplicate-drop"
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "firstHiddenFailure": null,
+      "note": "Passes the visible tests and every hidden case derived from the stated constraints."
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "A",
+      "label": "A — always starts with first list",
+      "role": "edge-case-candidate",
+      "visiblePass": true,
+      "hiddenPass": false,
+      "verdict": "edge-case-broken",
+      "visible": [
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                2,
+                4
+              ],
+              [
+                1,
+                3,
+                4
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              []
+            ],
+            "expected": []
+          },
+          "result": {
+            "status": "pass",
+            "actual": []
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              [
+                0
+              ]
+            ],
+            "expected": [
+              0
+            ]
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              0
+            ]
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": [
+              [
+                5
+              ],
+              [
+                1,
+                2,
+                3
+              ]
+            ],
+            "expected": [
+              1,
+              2,
+              3,
+              5
+            ],
+            "catches": "First-list bias.",
+            "class": "first-list-bias"
+          },
+          "result": {
+            "status": "fail",
+            "actual": [
+              5,
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3,
+              5
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "catches": "Uses < not <=.",
+            "class": "duplicate-drop"
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": [
+          [
+            5
+          ],
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "actual": [
+          5,
+          1,
+          2,
+          3
+        ],
+        "error": null,
+        "catches": "First-list bias.",
+        "class": "first-list-bias"
+      },
+      "note": "Passes every visible test and fails on input [[5],[1,2,3]] (expected [1,2,3,5], got [5,1,2,3]). First-list bias."
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "B",
+      "label": "B — reversed merge",
+      "role": "incorrect-candidate",
+      "visiblePass": false,
+      "hiddenPass": false,
+      "verdict": "incorrect",
+      "visible": [
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                2,
+                4
+              ],
+              [
+                1,
+                3,
+                4
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          },
+          "result": {
+            "status": "fail",
+            "actual": [
+              1,
+              3,
+              4,
+              1,
+              2,
+              4
+            ],
+            "expected": [
+              1,
+              1,
+              2,
+              3,
+              4,
+              4
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              []
+            ],
+            "expected": []
+          },
+          "result": {
+            "status": "pass",
+            "actual": []
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [],
+              [
+                0
+              ]
+            ],
+            "expected": [
+              0
+            ]
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              0
+            ]
+          }
+        }
+      ],
+      "hidden": [
+        {
+          "case": {
+            "input": [
+              [
+                5
+              ],
+              [
+                1,
+                2,
+                3
+              ]
+            ],
+            "expected": [
+              1,
+              2,
+              3,
+              5
+            ],
+            "catches": "First-list bias.",
+            "class": "first-list-bias"
+          },
+          "result": {
+            "status": "fail",
+            "actual": [
+              5,
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3,
+              5
+            ]
+          }
+        },
+        {
+          "case": {
+            "input": [
+              [
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "expected": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "catches": "Uses < not <=.",
+            "class": "duplicate-drop"
+          },
+          "result": {
+            "status": "pass",
+            "actual": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "firstHiddenFailure": {
+        "input": [
+          [
+            5
+          ],
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "actual": [
+          5,
+          1,
+          2,
+          3
+        ],
+        "error": null,
+        "catches": "First-list bias.",
+        "class": "first-list-bias"
+      },
+      "note": "Fails at least one visible test. Wrong answer on a case the candidate was shown."
+    }
+  ],
+  "expectations": [
+    {
+      "problemId": "P1",
+      "candidateId": "ref",
+      "declaredRole": "reference",
+      "actual": "correct",
+      "agree": true
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "A",
+      "declaredRole": "edge-case-candidate",
+      "actual": "edge-case-broken",
+      "agree": true
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "A2",
+      "declaredRole": "edge-case-candidate",
+      "actual": "edge-case-broken",
+      "agree": true
+    },
+    {
+      "problemId": "P1",
+      "candidateId": "B",
+      "declaredRole": "incorrect-candidate",
+      "actual": "incorrect",
+      "agree": true
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "ref",
+      "declaredRole": "reference",
+      "actual": "correct",
+      "agree": true
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "A",
+      "declaredRole": "edge-case-candidate",
+      "actual": "edge-case-broken",
+      "agree": true
+    },
+    {
+      "problemId": "P2",
+      "candidateId": "B",
+      "declaredRole": "incorrect-candidate",
+      "actual": "incorrect",
+      "agree": true
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "ref",
+      "declaredRole": "reference",
+      "actual": "correct",
+      "agree": true
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "A",
+      "declaredRole": "edge-case-candidate",
+      "actual": "edge-case-broken",
+      "agree": true
+    },
+    {
+      "problemId": "P3",
+      "candidateId": "B",
+      "declaredRole": "incorrect-candidate",
+      "actual": "incorrect",
+      "agree": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "correct": 3,
+    "edgeCaseBroken": 4,
+    "incorrect": 3,
+    "threw": 0,
+    "edgeCaseBrokenCandidates": [
+      "P1/A",
+      "P1/A2",
+      "P2/A",
+      "P3/A"
+    ],
+    "disagreements": 0,
+    "sound": true
+  }
+}
