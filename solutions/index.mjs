@@ -8,13 +8,6 @@ export const SOLUTIONS = {
     last.set(ch, right); best = Math.max(best, right - left + 1);
   } return best;
 }` },
-    // [BUG-B3] was a Set-based sliding window that was actually correct on
-    // every visible and hidden case, so it was classified as correct and
-    // flipped the artefact's sound flag to NO. Now the >= left guard is
-    // dropped, so the left pointer moves backwards on a stale index.
-    // Trace on abba: after bb, left=2; the trailing a has last[a]=0, so
-    // left becomes 1 and the window widens past the correct start.
-    // Result 3, expected 2. Fails only the hidden 'abba' case.
     { id: 'A', label: 'A — left can move backwards', role: 'edge-case-candidate', code: `function lengthOfLongestSubstring(s) {
   const last = {}; let best = 0, left = 0;
   for (let i = 0; i < s.length; i++) {
@@ -54,9 +47,6 @@ export const SOLUTIONS = {
   for (const ch of s) { if (open[ch] !== undefined) open[ch]++; else open[close[ch]]--; }
   return Object.values(open).every((n) => n === 0);
 }` },
-    // [BUG-B1] was: if (stack.pop() !== pairs[ch]) return false; which is
-    // correct on all 3 visible and all 3 hidden cases. Now the match check
-    // is gone, so (] returns true and a visible test fails.
     { id: 'B', label: 'B — no match check', role: 'incorrect-candidate', code: `function isValid(s) {
   const stack = [];
   for (const ch of s) {
@@ -83,9 +73,6 @@ export const SOLUTIONS = {
     tail = tail.next;
   } tail.next = a || b; return head;
 }` },
-    // [BUG-B2] was: if (a.val < b.val) which produces the same sorted output
-    // and passes every visible and hidden case. Now the comparison is
-    // reversed, so [1,2,4],[1,3,4] produces [1,3,4,1,2,4] and fails.
     { id: 'B', label: 'B — reversed merge', role: 'incorrect-candidate', code: `function mergeTwoLists(a, b) {
   const dummy = { val: 0, next: null }; let tail = dummy;
   while (a && b) {

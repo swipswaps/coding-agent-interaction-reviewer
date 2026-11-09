@@ -43,6 +43,18 @@ https://playwright.dev/docs/test-snapshots
 The verify workflow runs in mcr.microsoft.com/playwright, version pinned by the
 scaffold script to match @playwright/test.
 
+MATRIX PROVENANCE
+-----------------
+
+The committed matrix contains two non-deterministic fields:
+
+  generatedAt   wall-clock time of the run that produced the matrix
+  buildId       GITHUB_SHA on CI, null locally
+
+The deploy workflow's staleness check compares everything except those two, so
+a commit produced by a local run and a matrix regenerated in CI agree on the
+semantic content even though their timestamps differ.
+
 KNOWN LIMITS
 ------------
 

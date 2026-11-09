@@ -12,16 +12,39 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npm run review
-      - name: fail if the committed matrix is stale
+      - name: verify the committed matrix is not stale
         run: |
-          if ! git diff --quiet -- src/generated/matrix.json public/matrix.json; then
-            echo "The committed matrix is stale."
-            exit 2
-          fi
+          # Save the committed matrix before regenerating, then compare
+          # everything except the two fields that are intentionally
+          # non-deterministic (generatedAt, buildId).
+          cp src/generated/matrix.json /tmp/matrix-committed.json
+          npm run review
+          python3 - <<'PY'
+          import json, sys
+          def strip(o):
+              if isinstance(o, dict):
+                  return {k: strip(v) for k, v in o.items() if k not in ('generatedAt', 'buildId')}
+              if isinstance(o, list):
+                  return [strip(x) for x in o]
+              return o
+          try:
+              committed = strip(json.load(open('/tmp/matrix-committed.json')))
+              fresh = strip(json.load(open('src/generated/matrix.json')))
+              public = strip(json.load(open('public/matrix.json')))
+          except Exception as e:
+              print(f'Could not compare matrices: {e}')
+              sys.exit(2)
+          if committed != fresh:
+              print('The committed matrix is stale (semantic content differs).')
+              print('Run npm run review locally and commit the result.')
+              sys.exit(2)
+          if fresh != public:
+              print('src/generated/matrix.json and public/matrix.json disagree.')
+              sys.exit(2)
+          print('Matrix is up to date.')
+          PY
       - run: npm run build
       - uses: actions/configure-pages@v5
-      # [3] https://github.com/actions/upload-pages-artifact — v4 excludes dotfiles.
       - uses: actions/upload-pages-artifact@v4
         with: { path: ./dist }
   deploy:
