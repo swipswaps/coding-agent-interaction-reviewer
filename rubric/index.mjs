@@ -1,33 +1,64 @@
-// The interaction-review rubric.
+// The writing-evaluation rubric.
 //
-// Each dimension is scored 0 (absent), 1 (partial), or 2 (present).
-// The overall verdict is derived from the scores, not from whether the code
-// happens to work. That is the whole argument: a response can produce correct
-// code and still be a weak engineering interaction, and a response can produce
-// broken code and still be a strong one because the reasoning is honest.
+// Each dimension is scored 0 (absent), 1 (partial), or 2 (present). The
+// pairwise winner is derived from the weighted totals. The discrimination
+// matrix shows that the rubric disagrees with the shortcut verdict on every
+// pair where the shortcut is wrong.
 //
-// Dimensions, mapped to the G2i posting's own wording:
+// Dimensions, mapped to the posting's own wording:
 //
-//   preamble      "Whether the preamble and reasoning are useful"
-//   reasoning     "Whether the response makes sense"
-//   judgment      "Whether the output reflects strong engineering judgment"
-//   trust         "Whether the interaction feels right to an experienced
-//                 developer" / "Would this build or erode trust"
+//   clarity      "judge clarity" — does the reader know what to do next?
+//   tone         "judge tone" — does the register match the named reader?
+//   helpfulness  "judge ... usefulness" — can the reader act on it?
+//   adherence    "adherence to instructions" — did it answer the prompt asked?
+//   substance    "AI slop" detection — would each claim survive a fact-check?
 
 export const DIMENSIONS = [
-  { id: 'preamble', label: 'Preamble', question: 'Does the preamble help the reader decide what to do, or is it noise?', weight: 0.25 },
-  { id: 'reasoning', label: 'Reasoning', question: 'Does the explanation hold together, or does it assert without support?', weight: 0.25 },
-  { id: 'judgment', label: 'Engineering judgment', question: 'Does the response reflect how a strong engineer would think about the problem?', weight: 0.30 },
-  { id: 'trust', label: 'Trust calibration', question: 'Would this interaction build or erode an experienced developer’s trust?', weight: 0.20 },
+  {
+    id: 'clarity',
+    label: 'Clarity',
+    question: 'Does the reader know what to do next, or is the prose decoration?',
+    weight: 0.20,
+    // [2] Google Technical Writing: clarity is actionability, not grammar.
+  },
+  {
+    id: 'tone',
+    label: 'Tone',
+    question: 'Does the register match the named reader (new contributor, integrator, junior, README reader)?',
+    weight: 0.10,
+    // [3] Google developer documentation style guide: conversational, not casual.
+  },
+  {
+    id: 'helpfulness',
+    label: 'Helpfulness',
+    question: 'Can the reader act on this without asking a follow-up question?',
+    weight: 0.25,
+    // [4] Microsoft Writing Style Guide: actionability over completeness.
+  },
+  {
+    id: 'adherence',
+    label: 'Adherence',
+    question: 'Did the response answer the prompt that was asked, including constraints?',
+    weight: 0.15,
+    // [5] Diataxis: the prompt names a mode; answering in a different mode is non-adherence.
+  },
+  {
+    id: 'substance',
+    label: 'Substance',
+    question: 'Would each claim survive a fact-check, or is it fluent filler?',
+    weight: 0.30,
+    // [6] ISO 8601 as the reference for date/duration claims.
+  },
 ]
 
-export const VERDICTS = ['strong', 'weak', 'misleading']
+export const RESPONSE_BANDS = ['publishable', 'needs-edit', 'ai-slop']
 
-export function scoreInteraction(interaction, scores) {
+// Score one response. Returns { total, band, detail }.
+// total is on a 0–2 scale (weighted sum, max 2).
+export function scoreResponse(scores) {
   let weighted = 0
   let totalWeight = 0
   const detail = []
-
   for (const dim of DIMENSIONS) {
     const raw = scores[dim.id]
     if (typeof raw !== 'number' || raw < 0 || raw > 2) {
@@ -37,46 +68,56 @@ export function scoreInteraction(interaction, scores) {
     totalWeight += 2 * dim.weight
     detail.push({ id: dim.id, label: dim.label, score: raw, question: dim.question })
   }
-
-  const normalised = totalWeight > 0 ? weighted / totalWeight : 0
-  const percent = Math.round(normalised * 100)
-
-  // Derivation, stated so it can be argued with:
-  //   strong      every dimension at least 1, and at least three at 2
-  //   misleading  any dimension at 0 (the response actively misleads)
-  //   weak        everything else (correct but not strong, or partial)
-  const atLeastOne = DIMENSIONS.every((d) => scores[d.id] >= 1)
-  const atLeastThreeTwos = DIMENSIONS.filter((d) => scores[d.id] === 2).length >= 3
-  const anyZero = DIMENSIONS.some((d) => scores[d.id] === 0)
-
-  let verdict
-  if (anyZero) verdict = 'misleading'
-  else if (atLeastOne && atLeastThreeTwos) verdict = 'strong'
-  else verdict = 'weak'
-
-  return { verdict, percent, detail, interactionId: interaction.id }
+  const total = totalWeight > 0 ? (weighted / totalWeight) * 2 : 0
+  // Band derivation, stated so it can be argued with:
+  //   publishable  total >= 1.70
+  //   needs-edit   1.00 <= total < 1.70
+  //   ai-slop      total < 1.00
+  let band
+  if (total >= 1.70) band = 'publishable'
+  else if (total >= 1.00) band = 'needs-edit'
+  else band = 'ai-slop'
+  return { total: Math.round(total * 100) / 100, band, detail }
 }
 
-export function reviewInteraction(interaction) {
-  const scored = scoreInteraction(interaction, interaction.scores)
+// Evaluate one pair. Returns the full row used by the dashboard.
+//
+// A pairwise winner is derived from the totals. Ties are declared only on
+// exact equality; with authored scores that will not happen, and the matrix
+// is more useful if it is decisive than if it hedges.
+export function evaluatePair(pair) {
+  const a = scoreResponse(pair.responses.A.scores)
+  const b = scoreResponse(pair.responses.B.scores)
+  if (a.error || b.error) return { error: a.error ?? b.error }
+
+  let rubricPick
+  if (a.total > b.total) rubricPick = 'A'
+  else if (b.total > a.total) rubricPick = 'B'
+  else rubricPick = 'tie'
+
   return {
-    ...scored,
-    prompt: interaction.prompt,
-    response: interaction.response,
-    label: interaction.label,
-    temptingVerdict: interaction.temptingVerdict,
-    referenceVerdict: interaction.referenceVerdict,
-    catches: interaction.catches,
-    note: buildNote(scored.verdict, interaction),
+    pairId: pair.id,
+    prompt: pair.prompt,
+    shortcut: pair.shortcut,       // 'longer-wins' or 'cautious-wins'
+    shortcutPick: pair.shortcutPick,
+    referencePick: pair.referencePick,
+    rubricPick,
+    rejectsShortcut: rubricPick !== pair.shortcutPick,
+    matchesReference: rubricPick === pair.referencePick,
+    A: { label: pair.responses.A.label, text: pair.responses.A.text, ...a },
+    B: { label: pair.responses.B.label, text: pair.responses.B.text, ...b },
+    catches: pair.catches,
+    note: buildNote(rubricPick, pair, a, b),
   }
 }
 
-function buildNote(verdict, interaction) {
-  if (verdict === 'strong') {
-    return 'Strong interaction: preamble is useful, reasoning holds, judgment reflects a senior engineer, and the response earns trust.'
-  }
-  if (verdict === 'misleading') {
-    return `Misleading: at least one dimension is absent. ${interaction.catches}`
-  }
-  return `Weak: the code may run, but at least one dimension is partial. ${interaction.catches}`
+// buildNote reads band from the scored results (a, b), not from the raw
+// pair responses. The previous version read pair.responses.X.band, which
+// does not exist — band is set by scoreResponse, not by the corpus.
+function buildNote(rubricPick, pair, a, b) {
+  const winner = rubricPick === 'A' ? a : b
+  const loser = rubricPick === 'A' ? b : a
+  const winnerLabel = rubricPick === 'A' ? pair.responses.A.label : pair.responses.B.label
+  const loserLabel = rubricPick === 'A' ? pair.responses.B.label : pair.responses.A.label
+  return `Rubric picks ${rubricPick} (${winnerLabel}, ${winner.band} band); ${loserLabel} scores in the ${loser.band} band. ${pair.catches}`
 }
