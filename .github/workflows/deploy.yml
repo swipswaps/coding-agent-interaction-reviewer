@@ -14,9 +14,6 @@ jobs:
       - run: npm ci
       - name: verify the committed matrix is not stale
         run: |
-          # Save the committed matrix before regenerating, then compare
-          # everything except the two fields that are intentionally
-          # non-deterministic (generatedAt, buildId).
           cp src/generated/matrix.json /tmp/matrix-committed.json
           npm run review
           python3 - <<'PY'

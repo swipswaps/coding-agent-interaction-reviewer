@@ -61,4 +61,4 @@ KNOWN LIMITS
 - JavaScript only.
 - Hidden cases are not exhaustive.
 - node:vm is not a security boundary.
-- No style, complexity, or explanation judgement.
+- No style, complexity or explanation judgement.
